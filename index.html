@@ -5,27 +5,179 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Planetary Alert System</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; text-align: center; }
-        .container { max-width: 1200px; margin: auto; padding: 20px; }
-        .section { margin-bottom: 30px; padding: 20px; background: #1e1e1e; border-radius: 10px; box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.1); }
-        h2 { color: #00bcd4; }
-        table { width: 100%; border-collapse: collapse; background: #222; color: #fff; margin-top: 10px; }
-        th, td { padding: 12px; border: 1px solid #444; text-align: left; }
-        th { background: #333; color: #00ffcc; }
-        tr:nth-child(even) { background: #292929; }
-        .error { color: red; font-weight: bold; }
-        .soho-images, .aurora-globe, .solar-flares-chart { display: flex; justify-content: center; flex-wrap: wrap; }
-        .soho-images img, .aurora-globe img { max-width: 300px; margin: 10px; border: 1px solid #444; border-radius: 5px; }
-        .solar-flares-chart canvas { width: 100%; max-width: 600px; }
-        #sun-image { max-width: 100%; height: auto; }
+        /* General Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to bottom, #000428, #004e92);
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #e4e6eb;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        p {
+            font-size: 1.2em;
+            color: #d0d0d0;
+            margin-bottom: 30px;
+        }
+
+        /* Section Styles */
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 15px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 12px 24px rgba(0, 0, 0, 0.7);
+        }
+
+        h2 {
+            color: #64b5f6;
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1.1px;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(40, 40, 40, 0.8);
+            color: #fff;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            border: 1px solid #666;
+            text-align: left;
+        }
+
+        th {
+            background: #333;
+            color: #80deea;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        tr:nth-child(even) {
+            background: rgba(50, 50, 50, 0.7);
+        }
+
+        /* Error Styles */
+        .error {
+            color: #ff6666;
+            font-weight: bold;
+        }
+
+        /* Image Styles */
+        .soho-images,
+        .aurora-globe,
+        .solar-flares-chart {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .soho-images img,
+        .aurora-globe img {
+            max-width: 300px;
+            margin: 15px;
+            border: 1px solid #777;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .soho-images img:hover,
+        .aurora-globe img:hover {
+            transform: scale(1.05);
+        }
+
+        /* Solar Flares Chart */
+        .solar-flares-chart canvas {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* Sun Image */
+        #sun-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Loading Animation */
+        @keyframes loading {
+            0% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.4;
+            }
+        }
+
+        #solar-activity,
+        #volcano-data,
+        #tsunami-alerts,
+        #weather-alerts,
+        #earthquake-alerts,
+        #sun-spot-numbers {
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #eee;
+            text-align: left;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+            animation: loading 2s linear infinite;
+        }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 </head>
+
 <body>
     <div class="container">
         <h1>🌍 AI Planetary Alert System 🚀</h1>
         <p>Real-time monitoring of Earth, solar activity, asteroids, and space weather.</p>
-        
+
         <div class="section">
             <h2>🌞 Solar Activity</h2>
             <pre id="solar-activity">Loading...</pre>
@@ -43,39 +195,44 @@
             <img id="sun-image" src="loading.gif" alt="Current Image of the Sun">
             <p id="sun-spot-numbers">Loading Sun Spot Numbers...</p>
         </div>
-        
+
         <div class="section">
             <h2>🌋 Volcanic Activity & Tsunamis</h2>
             <pre id="volcano-data">Loading...</pre>
             <pre id="tsunami-alerts">Loading...</pre>
         </div>
-        
+
         <div class="section">
             <h2>⛈️ Severe Weather Alerts (Maryland)</h2>
             <pre id="weather-alerts">Loading...</pre>
+        </div>
+
+        <div class="section">
+            <h2>🌍 Earthquake Alerts</h2>
+            <pre id="earthquake-alerts">Loading...</pre>
         </div>
     </div>
 
     <script>
         function fetchData(url, elementId, callback) {
             fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (callback) {
-                    callback(data);
-                } else {
-                    document.getElementById(elementId).textContent = JSON.stringify(data, null, 2);
-                }
-            })
-            .catch(error => {
-                document.getElementById(elementId).textContent = "Error loading data";
-                console.error(`Error fetching data from ${url}:`, error);
-            });
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (callback) {
+                        callback(data);
+                    } else {
+                        document.getElementById(elementId).textContent = JSON.stringify(data, null, 2);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById(elementId).textContent = "Error loading data";
+                    console.error(`Error fetching data from ${url}:`, error);
+                });
         }
 
         // Update Aurora Prediction Map
@@ -85,13 +242,16 @@
         setInterval(updateAuroraGlobe, 600000);
         updateAuroraGlobe();
 
-        // Fetch Volcanic Activity & Tsunamis Data
-        fetchData("https://volcano.si.edu/news/WeeklyVolcanoRSS.xml", "volcano-data");
-        fetchData("https://www.tsunami.gov/events/xml/PAAQ.atom", "tsunami-alerts");
+        // Fetch Solar Activity Data
+        fetchData("https://api.nasa.gov/DONKI/CME?startDate=2024-02-06&endDate=2024-02-13&api_key=DEMO_KEY", "solar-activity", function (data) {
+            let solarActivityText = "Recent Coronal Mass Ejections:\n";
+            data.forEach(cme => {
+                solarActivityText += `- ${cme.startTime}: ${cme.note}\n`;
+            });
+            document.getElementById("solar-activity").textContent = solarActivityText;
+        });
 
-        // Fetch Severe Weather Alerts for Maryland
-        fetchData("https://api.weather.gov/alerts/active?area=MD", "weather-alerts");
-    </script>
-</body>
-</html>
-
+        // Update SOHO Images
+        function updateSOHOImages() {
+            const timestamp = new Date().getTime();
+            document.getElementById('eit-171').src = `https://soho.nascom.nasa.gov/data/
