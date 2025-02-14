@@ -5,44 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Planetary Alert System</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to bottom, #000428, #004e92);
-            color: #fff;
-            text-align: center;
-            padding: 20px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px;
-        }
-        .section {
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            backdrop-filter: blur(5px);
-        }
-        h1, h2 {
-            color: #78d6ff;
-        }
-        pre {
-            text-align: left;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 15px;
-            border-radius: 10px;
-            overflow-x: auto;
-            color: #b5ffd9;
-            max-height: 300px;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .section pre, .section img {
-            animation: fadeIn 1s ease-in-out;
-        }
+        body { font-family: Arial, sans-serif; background-color: #0a0a0a; color: #fff; text-align: center; }
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+        .section { margin-bottom: 30px; padding: 20px; background: #1c1c1c; border-radius: 10px; }
+        pre { text-align: left; background: #222; padding: 10px; border-radius: 5px; overflow-x: auto; color: #0f0; }
     </style>
 </head>
 <body>
@@ -53,103 +19,60 @@
         <div class="section">
             <h2>🌞 Solar Activity</h2>
             <pre id="solar-activity">Loading...</pre>
-            <img id="solar-activity-img" src="" alt="Solar Activity Chart">
         </div>
         
         <div class="section">
             <h2>🌎 Earthquake Data</h2>
             <pre id="earthquake-data">Loading...</pre>
-            <div id="earthquake-map" style="width: 100%; height: 400px;"></div>
         </div>
         
         <div class="section">
             <h2>🌙 Moon & Tides</h2>
             <pre id="moon-tides">Loading...</pre>
-            <img id="moon-tides-img" src="" alt="Moon Phases and Tides">
         </div>
         
         <div class="section">
             <h2>☄️ Near-Earth Objects</h2>
             <pre id="near-earth-objects">Loading...</pre>
-            <img id="neo-img" src="" alt="Near Earth Objects Visualization">
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
-
     <script>
-        // Function to clean and organize data
-        function cleanAndOrganizeData(data, type) {
-            if (type === 'earthquake') {
-                return data.features.map(feature => ({
-                    location: feature.properties.place,
-                    magnitude: feature.properties.mag,
-                    time: new Date(feature.properties.time).toLocaleString(),
-                    coordinates: feature.geometry.coordinates
-                }));
-            }
-            // Add more data cleaning functions for other types of data here
-            return data;
+        function fetchData(url, elementId) {
+            fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById(elementId).textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById(elementId).textContent = "Error loading data";
+                console.error(`Error fetching data from ${url}:`, error);
+            });
         }
 
-        // Fetch and process NASA NEO data
+        // Fix NASA API 400 error by using correct date format
         const today = new Date().toISOString().split("T")[0];
-        fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&api_key=YOUR_NASA_API_KEY`)
-        .then(response => response.json())
-        .then(data => {
-            const organizedData = cleanAndOrganizeData(data, 'neo');
-            document.getElementById('near-earth-objects').textContent = JSON.stringify(organizedData, null, 2);
-            // Placeholder for image generation - you'll need to implement this
-            document.getElementById('neo-img').src = 'path_to_your_neo_image.png';
-        })
-        .catch(error => console.error('NEO Fetch Error:', error));
+        const endDate = new Date();
+        endDate.setDate(endDate.getDate() + 7); // Fetching 7 days ahead for better tracking
+        const formattedEndDate = endDate.toISOString().split("T")[0];
+        fetchData(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${formattedEndDate}&api_key=1daN1duaWTVxHZal50lyPq6iWEf5uetZWKsMh5O7`, "near-earth-objects");
 
-        // Fetch and process NOAA Solar Activity data
-        fetch('https://services.swpc.noaa.gov/json/goes/xray.json')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('solar-activity').textContent = JSON.stringify(data, null, 2);
-            // Placeholder for image generation - you'll need to implement this
-            document.getElementById('solar-activity-img').src = 'path_to_your_solar_activity_chart.png';
-        })
-        .catch(error => console.error('Solar Activity Fetch Error:', error));
+        // Fix CORS error for NOAA API using CORS proxy
+        fetchData("https://corsproxy.io/?https://services.swpc.noaa.gov/json/goes/xray.json", "solar-activity");
 
-        // Fetch and visualize Earthquake data
-        fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson')
-        .then(response => response.json())
-        .then(data => {
-            const cleanedData = cleanAndOrganizeData(data, 'earthquake');
-            document.getElementById('earthquake-data').textContent = JSON.stringify(cleanedData, null, 2);
-            
-            // Initialize Leaflet map for earthquake visualization
-            var map = L.map('earthquake-map').setView([0, 0], 2);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
+        // Fetch Earthquake Data
+        fetchData("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson", "earthquake-data");
 
-            cleanedData.forEach(quake => {
-                if (quake.coordinates && quake.coordinates.length === 3) {
-                    L.circle([quake.coordinates[1], quake.coordinates[0]], {
-                        color: 'red',
-                        fillColor: '#f03',
-                        fillOpacity: 0.5,
-                        radius: quake.magnitude * 100000 // Scale radius by magnitude
-                    }).addTo(map).bindPopup(`Magnitude: ${quake.magnitude}<br>Location: ${quake.location}<br>Time: ${quake.time}`);
-                }
-            });
-        })
-        .catch(error => console.error('Earthquake Fetch Error:', error));
-
-        // Fetch Moon & Tides data - you'll need to handle visualization here
-        fetch('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=MLLW&units=english&time_zone=gmt&format=json')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('moon-tides').textContent = JSON.stringify(data, null, 2);
-            // Placeholder for image generation - you'll need to implement this
-            document.getElementById('moon-tides-img').src = 'path_to_your_moon_tides_image.png';
-        })
-        .catch(error => console.error('Moon & Tides Fetch Error:', error));
+        // Fetch Moon & Tides Data
+        fetchData("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=MLLW&units=english&time_zone=gmt&format=json", "moon-tides");
     </script>
 </body>
 </html>
+
+
+   
