@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Planetary Alert System</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #fff; text-align: center; }
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; text-align: center; }
         .container { max-width: 1200px; margin: auto; padding: 20px; }
         .section { margin-bottom: 30px; padding: 20px; background: #1e1e1e; border-radius: 10px; box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.1); }
         h2 { color: #00bcd4; }
@@ -14,12 +14,9 @@
         th { background: #333; color: #00ffcc; }
         tr:nth-child(even) { background: #292929; }
         .error { color: red; font-weight: bold; }
-        .chart-container { width: 100%; height: 300px; margin: 20px 0; }
-        #earthquake-map { width: 100%; height: 400px; }
+        .soho-images { display: flex; justify-content: space-around; flex-wrap: wrap; }
+        .soho-images img { max-width: 300px; margin: 10px; border: 1px solid #444; border-radius: 5px; }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
 </head>
 <body>
     <div class="container">
@@ -28,20 +25,35 @@
         
         <div class="section">
             <h2>🌞 Solar Activity</h2>
-            <div class="chart-container" id="solar-activity-chart"></div>
             <pre id="solar-activity">Loading...</pre>
+            <div class="soho-images">
+                <img id="eit-171" src="loading.gif" alt="SOHO EIT 171 Å Image">
+                <img id="lasco-c2" src="loading.gif" alt="SOHO LASCO C2 Image">
+                <img id="lasco-c3" src="loading.gif" alt="SOHO LASCO C3 Image">
+            </div>
         </div>
         
         <div class="section">
             <h2>🌎 Recent Earthquakes</h2>
-            <div id="earthquake-map"></div>
-            <pre id="earthquake-data">Loading...</pre>
+            <table id="earthquake-table">
+                <tr>
+                    <th>Magnitude</th>
+                    <th>Location</th>
+                    <th>Time</th>
+                </tr>
+            </table>
+            <p id="earthquake-data" class="error">Loading...</p>
         </div>
         
         <div class="section">
             <h2>🌙 Moon & Tides</h2>
-            <div class="chart-container" id="tides-chart"></div>
-            <pre id="moon-tides">Loading...</pre>
+            <table id="moon-tides-table">
+                <tr>
+                    <th>Time</th>
+                    <th>Tide Height (ft)</th>
+                </tr>
+            </table>
+            <p id="moon-tides" class="error">Loading...</p>
         </div>
         
         <div class="section">
@@ -56,6 +68,11 @@
                 </tr>
             </table>
             <p id="near-earth-objects" class="error">Loading...</p>
+        </div>
+
+        <div class="section">
+            <h2>🛰️ Space Weather</h2>
+            <pre id="space-weather">Loading...</pre>
         </div>
     </div>
 
@@ -81,7 +98,22 @@
             });
         }
 
-        // For Near Earth Objects
+        // Function to update SOHO images
+        function updateSOHOImages() {
+            const eit171 = document.getElementById('eit-171');
+            const lascoC2 = document.getElementById('lasco-c2');
+            const lascoC3 = document.getElementById('lasco-c3');
+            
+            eit171.src = "https://soho.nascom.nasa.gov/data/realtime/eit_171/512/latest.jpg";
+            lascoC2.src = "https://soho.nascom.nasa.gov/data/realtime/c2/512/latest.jpg";
+            lascoC3.src = "https://soho.nascom.nasa.gov/data/realtime/c3/512/latest.jpg";
+        }
+
+        // Update SOHO images on page load and every 10 minutes
+        updateSOHOImages();
+        setInterval(updateSOHOImages, 600000); // 10 minutes in milliseconds
+
+        // NASA NEO API
         const today = new Date().toISOString().split("T")[0];
         const endDate = new Date();
         endDate.setDate(endDate.getDate() + 7);
@@ -105,92 +137,42 @@
                     neoTable.appendChild(row);
                 });
             });
-
-            // NEO Chart - Size vs Miss Distance
-            const sizes = neoData[today].map(obj => parseFloat((obj.estimated_diameter.meters.estimated_diameter_min + obj.estimated_diameter.meters.estimated_diameter_max) / 2));
-            const distances = neoData[today].map(obj => parseFloat(obj.close_approach_data[0].miss_distance.kilometers));
-            new Chart(document.getElementById('neo-chart'), {
-                type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: 'Asteroid Size vs Distance',
-                        data: sizes.map((size, i) => ({ x: distances[i], y: size })),
-                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                        borderColor: 'rgba(255, 99, 132, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: { type: 'logarithmic', title: { display: true, text: 'Miss Distance (km)' } },
-                        y: { title: { display: true, text: 'Size (m)' } }
-                    }
-                }
-            });
         });
 
-        // Solar Activity Chart
-        fetchData("https://corsproxy.io/?https://services.swpc.noaa.gov/json/goes/xray.json", "solar-activity", function(data) {
-            const times = data.map(item => item.time_tag);
-            const fluxes = data.map(item => parseFloat(item.flux));
-            new Chart(document.getElementById('solar-activity-chart'), {
-                type: 'line',
-                data: {
-                    labels: times,
-                    datasets: [{
-                        label: 'X-ray Flux',
-                        data: fluxes,
-                        fill: false,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }]
-                }
-            });
-        });
+        // NOAA Solar Activity
+        fetchData("https://corsproxy.io/?https://services.swpc.noaa.gov/json/goes/xray.json", "solar-activity");
 
-        // Earthquake Map
+        // USGS Earthquake Data
         fetchData("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson", "earthquake-data", function(data) {
-            const map = L.map('earthquake-map').setView([0, 0], 2);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
-
+            document.getElementById("earthquake-data").style.display = "none";
+            const table = document.getElementById("earthquake-table");
             data.features.forEach(feature => {
-                if (feature.geometry && feature.geometry.coordinates) {
-                    L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]])
-                        .addTo(map)
-                        .bindPopup(`Magnitude: ${feature.properties.mag}<br>Location: ${feature.properties.place}`);
-                }
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${feature.properties.mag}</td>
+                    <td>${feature.properties.place}</td>
+                    <td>${new Date(feature.properties.time).toLocaleString()}</td>
+                `;
+                table.appendChild(row);
             });
-
-            // Fit map to markers
-            const group = new L.featureGroup();
-            data.features.forEach(feature => {
-                if (feature.geometry && feature.geometry.coordinates) {
-                    group.addLayer(L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]]));
-                }
-            });
-            map.fitBounds(group.getBounds());
         });
 
-        // Moon & Tides - Add a simple bar chart for tide heights
+        // NOAA Moon & Tides Data
         fetchData("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=MLLW&units=english&time_zone=gmt&format=json", "moon-tides", function(data) {
-            const labels = data.predictions.map(item => item.t);
-            const tideHeights = data.predictions.map(item => parseFloat(item.v));
-            new Chart(document.getElementById('tides-chart'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Tide Height (ft)',
-                        data: tideHeights,
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                }
+            document.getElementById("moon-tides").style.display = "none";
+            const table = document.getElementById("moon-tides-table");
+            data.predictions.forEach(pred => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${pred.t}</td>
+                    <td>${pred.v}</td>
+                `;
+                table.appendChild(row);
             });
         });
+
+        // NOAA Space Weather
+        fetchData("https://corsproxy.io/?https://services.swpc.noaa.gov/json/planetary_k_index_1m.json", "space-weather");
     </script>
 </body>
 </html>
