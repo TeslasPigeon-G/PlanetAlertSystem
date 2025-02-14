@@ -228,6 +228,27 @@
         .solar-item p {
             margin: 5px 0;
         }
+
+        /* New styles for the solar flare grid */
+        #solar-flare-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .flare-item {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border: 1px solid #ff4500;
+            border-radius: 5px;
+            text-align: center;
+            color: white;
+        }
+
+        .flare-item p {
+            margin: 5px 0;
+        }
     </style>
     <!-- Fonts and Libraries -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
@@ -289,9 +310,17 @@
             <img id="aurora-globe" src="loading.gif" alt="Aurora Prediction Map" style="max-width: 100%;">
             <div id="aurora-map"></div>
 
-            <!-- Solar Flares Chart -->
-            <div class="data-label">Solar Flares (Labeled):</div>
-            <canvas id="solar-flares"></canvas>
+            <!-- Solar Flares Grid -->
+            <div class="data-label">Solar Flares:</div>
+            <div id="solar-flare-grid">
+                <!-- Solar flare data will be dynamically inserted here -->
+            </div>
+
+            <!-- Solar Flares Chart (Commented out, but kept for reference) -->
+            <!--
+      <div class="data-label">Solar Flares (Labeled):</div>
+      <canvas id="solar-flares"></canvas>
+      -->
 
             <!-- Current Sun Image -->
             <div class="data-label">Current Sun Image:</div>
@@ -327,7 +356,7 @@
             fetch(url)
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error(`Network response was not ok for ${url}`);
                     }
                     return response.json();
                 })
@@ -339,11 +368,14 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Fetch Error:', error);
+                    console.error(`Fetch Error for ${url}:`, error);
+                    const element = document.getElementById(elementId);
                     if (fallbackUrl) {
+                        console.log(`Attempting fallback URL: ${fallbackUrl}`);
                         fetchData(fallbackUrl, elementId, callback);
-                    } else if (elementId) {
-                        document.getElementById(elementId).textContent = "Error loading data.";
+                    } else if (element) {
+                        element.textContent = "Error loading data.  Please check console.";
+                        element.classList.add("error"); // Add a class for styling the error
                     }
                 });
         }
@@ -356,6 +388,8 @@
 
         function populateSolarGrid() {
             const solarGrid = document.getElementById("solar-grid");
+            if (!solarGrid) return; // Exit if the element doesn't exist
+
             solarGrid.innerHTML = "";
             solarEvents.forEach(event => {
                 const div = document.createElement("div");
@@ -389,6 +423,9 @@
 
         // Aurora Map
         function initializeAuroraMap() {
+            const mapElement = document.getElementById("aurora-map");
+            if (!mapElement) return;
+
             const map = L.map("aurora-map").setView([65, -20], 2);
             L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
                 attribution: "© OpenStreetMap contributors"
@@ -425,70 +462,110 @@
                 }, 300000); // Update every 5 minutes
             });
         }
-        // Solar Flares Chart
-        fetchData(
-            "https://api.nasa.gov/DONKI/FLR?startDate=2024-02-06&endDate=2024-02-13&api_key=DEMO_KEY",
-            null,
-            function (data) {
-                const ctx = document.getElementById("solar-flares").getContext("2d");
-                new Chart(ctx, {
-                    type: "bar",
-                    data: {
-                        labels: data.map(flare => new Date(flare.beginTime).toLocaleDateString()),
-                        datasets: [{
-                            label: "Flare Class (Numeric Scale)",
-                            data: data.map(flare => {
-                                let letter = flare.classType.charAt(0);
-                                let scale = letter.charCodeAt(0) - "A".charCodeAt(0) + 1;
-                                return scale;
-                            }),
-                            backgroundColor: "rgba(255, 152, 0, 0.7)",
-                            borderColor: "rgba(255, 152, 0, 1)",
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        const index = context.dataIndex;
-                                        const flare = data[index];
-                                        return `Class: ${flare.classType}, Time: ${new Date(flare.beginTime).toLocaleString()}`;
-                                    }
-                                }
-                            },
-                            legend: {
-                                labels: { color: "white" }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1,
-                                    callback: function (value) {
-                                        return String.fromCharCode("A".charCodeAt(0) + value - 1);
-                                    }
-                                },
-                                title: {
-                                    display: true,
-                                    text: "Flare Class",
-                                    color: "white"
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: "Date",
-                                    color: "white"
-                                }
-                            }
-                        }
-                    }
-                });
+
+        function populateSolarFlareGrid(data) {
+            const solarFlareGrid = document.getElementById("solar-flare-grid");
+            if (!solarFlareGrid) {
+                console.error("Solar flare grid element not found!");
+                return;
             }
+
+            solarFlareGrid.innerHTML = ""; // Clear any existing data
+
+            if (!data || data.length === 0) {
+                solarFlareGrid.innerHTML = "<p>No solar flare data available.</p>";
+                return;
+            }
+
+            data.forEach(flare => {
+                const div = document.createElement("div");
+                div.className = "flare-item";
+
+                // Format the date and time
+                const startTime = new Date(flare.beginTime);
+                const date = startTime.toLocaleDateString();
+                const time = startTime.toLocaleTimeString();
+
+
+                div.innerHTML = `
+            <p><strong>Date:</strong> ${date}</p>
+            <p><strong>Time:</strong> ${time}</p>
+            <p><strong>Class:</strong> ${flare.classType}</p>
+          `;
+                solarFlareGrid.appendChild(div);
+            });
+        }
+
+        // Solar Flares Data and Grid
+        const flareAPIUrl = "https://api.nasa.gov/DONKI/FLR?startDate=2024-02-06&endDate=2024-02-13&api_key=DEMO_KEY"; // Replace with your API key
+        fetchData(flareAPIUrl, null, populateSolarFlareGrid);
+
+        /*
+        // Solar Flares Chart (Original Chart.js code, commented out)
+        fetchData(
+          "https://api.nasa.gov/DONKI/FLR?startDate=2024-02-06&endDate=2024-02-13&api_key=YOUR_API_KEY_HERE",
+          null,
+          function(data) {
+            const ctx = document.getElementById("solar-flares").getContext("2d");
+            new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels: data.map(flare => new Date(flare.beginTime).toLocaleDateString()),
+                datasets: [{
+                  label: "Flare Class (Numeric Scale)",
+                  data: data.map(flare => {
+                    let letter = flare.classType.charAt(0);
+                    let scale = letter.charCodeAt(0) - "A".charCodeAt(0) + 1;
+                    return scale;
+                  }),
+                  backgroundColor: "rgba(255, 152, 0, 0.7)",
+                  borderColor: "rgba(255, 152, 0, 1)",
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                plugins: {
+                  tooltip: {
+                    callbacks: {
+                      label: function(context) {
+                        const index = context.dataIndex;
+                        const flare = data[index];
+                        return `Class: ${flare.classType}, Time: ${new Date(flare.beginTime).toLocaleString()}`;
+                      }
+                    }
+                  },
+                  legend: {
+                    labels: { color: "white" }
+                  }
+                },
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      stepSize: 1,
+                      callback: function(value) {
+                        return String.fromCharCode("A".charCodeAt(0) + value - 1);
+                      }
+                    },
+                    title: {
+                      display: true,
+                      text: "Flare Class",
+                      color: "white"
+                    }
+                  },
+                  x: {
+                    title: {
+                      display: true,
+                      text: "Date",
+                      color: "white"
+                    }
+                  }
+                }
+              }
+            });
+          }
         );
+        */
 
         // Sun Image
         function updateSunImage() {
@@ -505,8 +582,8 @@
         updateSchumannGraph();
 
         // NEO, Fireball, and NHATS Data
-        const neoURL = "https://ssd-api.jpl.nasa.gov/neo/rest/v1/feed?start_date=2024-02-01&end_date=2024-02-14&api_key=DEMO_KEY";
-        const fireballURL = "https://ssd-api.jpl.nasa.gov/fireball.api?date-min=2024-02-01&date-max=2024-02-14&api_key=DEMO_KEY";
+        const neoURL = "https://ssd-api.jpl.nasa.gov/neo/rest/v1/feed?start_date=2024-02-01&end_date=2024-02-14&api_key=DEMO_KEY"; //ADD YOUR API KEY
+        const fireballURL = "https://ssd-api.jpl.nasa.gov/fireball.api?date-min=2024-02-01&date-max=2024-02-14&api_key=DEMO_KEY"; //ADD YOUR API KEY
         // There is no public NHATS API, using a placeholder
         const nhatsURL = "https://www.example.com/nhats_data.json";
 
@@ -523,3 +600,4 @@
 </body>
 
 </html>
+
