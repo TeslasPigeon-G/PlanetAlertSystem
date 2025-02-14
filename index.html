@@ -5,68 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Planetary Alert System</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #0a0a0a; color: #fff; text-align: center; }
-        .container { max-width: 1200px; margin: auto; padding: 20px; }
-        .section { margin-bottom: 30px; padding: 20px; background: #1c1c1c; border-radius: 10px; }
-        pre { text-align: left; background: #222; padding: 10px; border-radius: 5px; overflow-x: auto; color: #0f0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to bottom, #000428, #004e92);
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+        h1, h2 {
+            color: #78d6ff;
+        }
+        pre {
+            text-align: left;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+            color: #b5ffd9;
+            max-height: 300px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .section pre {
+            animation: fadeIn 1s ease-in-out;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🌍 AI Planetary Alert System 🚀</h1>
-        <p>Real-time monitoring of Earth, solar activity, asteroids, and space weather.</p>
-        
-        <div class="section">
-            <h2>🌞 Solar Activity</h2>
-            <pre id="solar-activity">Loading...</pre>
-        </div>
-        
-        <div class="section">
-            <h2>🌎 Earthquake Data</h2>
-            <pre id="earthquake-data">Loading...</pre>
-        </div>
-        
-        <div class="section">
-            <h2>🌙 Moon & Tides</h2>
-            <pre id="moon-tides">Loading...</pre>
-        </div>
-        
-        <div class="section">
-            <h2>☄️ Near-Earth Objects</h2>
-            <pre id="near-earth-objects">Loading...</pre>
-        </div>
-    </div>
-
-    <script>
-        function fetchData(url, elementId) {
-            fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById(elementId).textContent = JSON.stringify(data, null, 2);
-            })
-            .catch(error => {
-                document.getElementById(elementId).textContent = "Error loading data";
-                console.error(`Error fetching data from ${url}:`, error);
-            });
-        }
-
-        // Fix NASA API 400 error by using correct date format
-        const today = new Date().toISOString().split("T")[0];
-        fetchData(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&api_key=1daN1duaWTVxHZal50lyPq6iWEf5uetZWKsMh5O7`, "near-earth-objects");
-
-        // Fix CORS error for NOAA API using CORS proxy
-        fetchData("https://corsproxy.io/?https://services.swpc.noaa.gov/json/goes/xray.json", "solar-activity");
-
-        // Fetch Earthquake Data
-        fetchData("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson", "earthquake-data");
-
-        // Fetch Moon & Tides Data
-        fetchData("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=MLLW&units=english&time_zone=gmt&format=json", "moon-tides");
-    </script>
-</body>
-</html>
+        <p>Real-time monitoring
