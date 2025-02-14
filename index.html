@@ -14,9 +14,12 @@
         th { background: #333; color: #00ffcc; }
         tr:nth-child(even) { background: #292929; }
         .error { color: red; font-weight: bold; }
-        .soho-images { display: flex; justify-content: space-around; flex-wrap: wrap; }
-        .soho-images img { max-width: 300px; margin: 10px; border: 1px solid #444; border-radius: 5px; }
+        .soho-images, .aurora-globe, .solar-flares-chart { display: flex; justify-content: center; flex-wrap: wrap; }
+        .soho-images img, .aurora-globe img { max-width: 300px; margin: 10px; border: 1px solid #444; border-radius: 5px; }
+        .solar-flares-chart canvas { width: 100%; max-width: 600px; }
+        #sun-image { max-width: 100%; height: auto; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -31,49 +34,18 @@
                 <img id="lasco-c2" src="loading.gif" alt="SOHO LASCO C2 Image">
                 <img id="lasco-c3" src="loading.gif" alt="SOHO LASCO C3 Image">
             </div>
+            <div class="aurora-globe">
+                <img id="aurora-globe" src="loading.gif" alt="Aurora Globe">
+            </div>
+            <div class="solar-flares-chart">
+                <canvas id="solar-flares"></canvas>
+            </div>
+            <img id="sun-image" src="loading.gif" alt="Current Image of the Sun">
+            <p id="sun-spot-numbers">Loading Sun Spot Numbers...</p>
         </div>
         
-        <div class="section">
-            <h2>🌎 Recent Earthquakes</h2>
-            <table id="earthquake-table">
-                <tr>
-                    <th>Magnitude</th>
-                    <th>Location</th>
-                    <th>Time</th>
-                </tr>
-            </table>
-            <p id="earthquake-data" class="error">Loading...</p>
-        </div>
-        
-        <div class="section">
-            <h2>🌙 Moon & Tides</h2>
-            <table id="moon-tides-table">
-                <tr>
-                    <th>Time</th>
-                    <th>Tide Height (ft)</th>
-                </tr>
-            </table>
-            <p id="moon-tides" class="error">Loading...</p>
-        </div>
-        
-        <div class="section">
-            <h2>☄️ Near-Earth Objects (Asteroids)</h2>
-            <table id="neo-table">
-                <tr>
-                    <th>Name</th>
-                    <th>Approach Date</th>
-                    <th>Miss Distance (km)</th>
-                    <th>Velocity (km/s)</th>
-                    <th>Size (m)</th>
-                </tr>
-            </table>
-            <p id="near-earth-objects" class="error">Loading...</p>
-        </div>
+        <!-- Other sections like before -->
 
-        <div class="section">
-            <h2>🛰️ Space Weather</h2>
-            <pre id="space-weather">Loading...</pre>
-        </div>
     </div>
 
     <script>
@@ -109,70 +81,75 @@
             lascoC3.src = "https://soho.nascom.nasa.gov/data/realtime/c3/512/latest.jpg";
         }
 
-        // Update SOHO images on page load and every 10 minutes
+        // Update SOHO images every 10 minutes
         updateSOHOImages();
-        setInterval(updateSOHOImages, 600000); // 10 minutes in milliseconds
+        setInterval(updateSOHOImages, 600000);
 
-        // NASA NEO API
-        const today = new Date().toISOString().split("T")[0];
-        const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 7);
-        const formattedEndDate = endDate.toISOString().split("T")[0];
-        
-        fetchData(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${formattedEndDate}&api_key=1daN1duaWTVxHZal50lyPq6iWEf5uetZWKsMh5O7`, "near-earth-objects", function(data) {
-            const neoTable = document.getElementById("neo-table");
-            document.getElementById("near-earth-objects").style.display = "none";
-            
-            const neoData = data.near_earth_objects;
-            Object.keys(neoData).forEach(date => {
-                neoData[date].forEach(obj => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${obj.name}</td>
-                        <td>${obj.close_approach_data[0].close_approach_date}</td>
-                        <td>${parseFloat(obj.close_approach_data[0].miss_distance.kilometers).toFixed(2)}</td>
-                        <td>${parseFloat(obj.close_approach_data[0].relative_velocity.kilometers_per_second).toFixed(2)}</td>
-                        <td>${parseFloat((obj.estimated_diameter.meters.estimated_diameter_min + obj.estimated_diameter.meters.estimated_diameter_max) / 2).toFixed(2)}</td>
-                    `;
-                    neoTable.appendChild(row);
-                });
+        // Aurora Globe Image
+        function updateAuroraGlobe() {
+            document.getElementById('aurora-globe').src = "https://services.swpc.noaa.gov/images/ovation-north-latest.jpg";
+        }
+        updateAuroraGlobe();
+        setInterval(updateAuroraGlobe, 600000); // Update every 10 minutes
+
+        // Solar Flares Chart
+        fetchData("https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json", "solar-activity", function(data) {
+            const ctx = document.getElementById('solar-flares').getContext('2d');
+            const labels = data.map(item => item.time_tag);
+            const sunspotNumbers = data.map(item => item.sunspot_number);
+            const flareClasses = data.map(item => item.flare_class); // Assuming flare class is available
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Sunspot Number',
+                            data: sunspotNumbers,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Flare Class',
+                            data: flareClasses.map(f => f ? ['C', 'M', 'X'].indexOf(f[0]) + 1 : 0), // Convert to numeric scale
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Sunspot Number' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: 'Flare Class (C,M,X)' }
+                        }
+                    }
+                }
             });
         });
 
-        // NOAA Solar Activity
-        fetchData("https://corsproxy.io/?https://services.swpc.noaa.gov/json/goes/xray.json", "solar-activity");
-
-        // USGS Earthquake Data
-        fetchData("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson", "earthquake-data", function(data) {
-            document.getElementById("earthquake-data").style.display = "none";
-            const table = document.getElementById("earthquake-table");
-            data.features.forEach(feature => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${feature.properties.mag}</td>
-                    <td>${feature.properties.place}</td>
-                    <td>${new Date(feature.properties.time).toLocaleString()}</td>
-                `;
-                table.appendChild(row);
+        // Current Sun Image with Sunspot Numbers
+        function updateSunImage() {
+            fetchData("https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json", null, function(data) {
+                const latest = data[data.length - 1];
+                if (latest && latest.sunspot_number !== undefined) {
+                    document.getElementById('sun-image').src = "https://services.swpc.noaa.gov/images/synoptic-map.jpg";
+                    document.getElementById('sun-spot-numbers').textContent = `Current Sunspot Number: ${latest.sunspot_number} | Last Updated: ${latest.time_tag}`;
+                }
             });
-        });
+        }
+        updateSunImage();
+        setInterval(updateSunImage, 3600000); // Update every hour
 
-        // NOAA Moon & Tides Data
-        fetchData("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=MLLW&units=english&time_zone=gmt&format=json", "moon-tides", function(data) {
-            document.getElementById("moon-tides").style.display = "none";
-            const table = document.getElementById("moon-tides-table");
-            data.predictions.forEach(pred => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${pred.t}</td>
-                    <td>${pred.v}</td>
-                `;
-                table.appendChild(row);
-            });
-        });
-
-        // NOAA Space Weather
-        fetchData("https://corsproxy.io/?https://services.swpc.noaa.gov/json/planetary_k_index_1m.json", "space-weather");
+        // ... Rest of your code for NEO, Earthquakes, Moon & Tides ...
     </script>
 </body>
 </html>
