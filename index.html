@@ -5,14 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Planetary Alert System</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #0a0a0a; color: #fff; text-align: center; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #fff; text-align: center; }
         .container { max-width: 1200px; margin: auto; padding: 20px; }
-        .section { margin-bottom: 30px; padding: 20px; background: #1c1c1c; border-radius: 10px; }
-        table { width: 100%; border-collapse: collapse; background: #222; color: #0f0; }
-        th, td { padding: 10px; border: 1px solid #444; text-align: left; }
-        th { background: #333; }
-        .error { color: red; }
+        .section { margin-bottom: 30px; padding: 20px; background: #1e1e1e; border-radius: 10px; box-shadow: 0px 4px 8px rgba(255, 255, 255, 0.1); }
+        h2 { color: #00bcd4; }
+        table { width: 100%; border-collapse: collapse; background: #222; color: #fff; margin-top: 10px; }
+        th, td { padding: 12px; border: 1px solid #444; text-align: left; }
+        th { background: #333; color: #00ffcc; }
+        tr:nth-child(even) { background: #292929; }
+        .error { color: red; font-weight: bold; }
+        .chart-container { width: 100%; height: 300px; margin: 20px 0; }
+        #earthquake-map { width: 100%; height: 400px; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css" />
 </head>
 <body>
     <div class="container">
@@ -21,26 +28,31 @@
         
         <div class="section">
             <h2>🌞 Solar Activity</h2>
+            <div class="chart-container" id="solar-activity-chart"></div>
             <pre id="solar-activity">Loading...</pre>
         </div>
         
         <div class="section">
-            <h2>🌎 Earthquake Data</h2>
+            <h2>🌎 Recent Earthquakes</h2>
+            <div id="earthquake-map"></div>
             <pre id="earthquake-data">Loading...</pre>
         </div>
         
         <div class="section">
             <h2>🌙 Moon & Tides</h2>
+            <div class="chart-container" id="tides-chart"></div>
             <pre id="moon-tides">Loading...</pre>
         </div>
         
         <div class="section">
-            <h2>☄️ Near-Earth Objects</h2>
+            <h2>☄️ Near-Earth Objects (Asteroids)</h2>
             <table id="neo-table">
                 <tr>
                     <th>Name</th>
-                    <th>Close Approach Date</th>
+                    <th>Approach Date</th>
                     <th>Miss Distance (km)</th>
+                    <th>Velocity (km/s)</th>
+                    <th>Size (m)</th>
                 </tr>
             </table>
             <p id="near-earth-objects" class="error">Loading...</p>
@@ -69,10 +81,10 @@
             });
         }
 
-        // Fix NASA API 400 error by using correct date format
+        // For Near Earth Objects
         const today = new Date().toISOString().split("T")[0];
         const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 7); // Fetching 7 days ahead for better tracking
+        endDate.setDate(endDate.getDate() + 7);
         const formattedEndDate = endDate.toISOString().split("T")[0];
         
         fetchData(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${formattedEndDate}&api_key=1daN1duaWTVxHZal50lyPq6iWEf5uetZWKsMh5O7`, "near-earth-objects", function(data) {
@@ -86,21 +98,99 @@
                     row.innerHTML = `
                         <td>${obj.name}</td>
                         <td>${obj.close_approach_data[0].close_approach_date}</td>
-                        <td>${obj.close_approach_data[0].miss_distance.kilometers}</td>
+                        <td>${parseFloat(obj.close_approach_data[0].miss_distance.kilometers).toFixed(2)}</td>
+                        <td>${parseFloat(obj.close_approach_data[0].relative_velocity.kilometers_per_second).toFixed(2)}</td>
+                        <td>${parseFloat((obj.estimated_diameter.meters.estimated_diameter_min + obj.estimated_diameter.meters.estimated_diameter_max) / 2).toFixed(2)}</td>
                     `;
                     neoTable.appendChild(row);
                 });
             });
+
+            // NEO Chart - Size vs Miss Distance
+            const sizes = neoData[today].map(obj => parseFloat((obj.estimated_diameter.meters.estimated_diameter_min + obj.estimated_diameter.meters.estimated_diameter_max) / 2));
+            const distances = neoData[today].map(obj => parseFloat(obj.close_approach_data[0].miss_distance.kilometers));
+            new Chart(document.getElementById('neo-chart'), {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Asteroid Size vs Distance',
+                        data: sizes.map((size, i) => ({ x: distances[i], y: size })),
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: { type: 'logarithmic', title: { display: true, text: 'Miss Distance (km)' } },
+                        y: { title: { display: true, text: 'Size (m)' } }
+                    }
+                }
+            });
         });
 
-        // Fix CORS error for NOAA API using CORS proxy
-        fetchData("https://corsproxy.io/?https://services.swpc.noaa.gov/json/goes/xray.json", "solar-activity");
+        // Solar Activity Chart
+        fetchData("https://corsproxy.io/?https://services.swpc.noaa.gov/json/goes/xray.json", "solar-activity", function(data) {
+            const times = data.map(item => item.time_tag);
+            const fluxes = data.map(item => parseFloat(item.flux));
+            new Chart(document.getElementById('solar-activity-chart'), {
+                type: 'line',
+                data: {
+                    labels: times,
+                    datasets: [{
+                        label: 'X-ray Flux',
+                        data: fluxes,
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                }
+            });
+        });
 
-        // Fetch Earthquake Data
-        fetchData("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson", "earthquake-data");
+        // Earthquake Map
+        fetchData("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson", "earthquake-data", function(data) {
+            const map = L.map('earthquake-map').setView([0, 0], 2);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
 
-        // Fetch Moon & Tides Data
-        fetchData("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=MLLW&units=english&time_zone=gmt&format=json", "moon-tides");
+            data.features.forEach(feature => {
+                if (feature.geometry && feature.geometry.coordinates) {
+                    L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]])
+                        .addTo(map)
+                        .bindPopup(`Magnitude: ${feature.properties.mag}<br>Location: ${feature.properties.place}`);
+                }
+            });
+
+            // Fit map to markers
+            const group = new L.featureGroup();
+            data.features.forEach(feature => {
+                if (feature.geometry && feature.geometry.coordinates) {
+                    group.addLayer(L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]]));
+                }
+            });
+            map.fitBounds(group.getBounds());
+        });
+
+        // Moon & Tides - Add a simple bar chart for tide heights
+        fetchData("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=MLLW&units=english&time_zone=gmt&format=json", "moon-tides", function(data) {
+            const labels = data.predictions.map(item => item.t);
+            const tideHeights = data.predictions.map(item => parseFloat(item.v));
+            new Chart(document.getElementById('tides-chart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Tide Height (ft)',
+                        data: tideHeights,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                }
+            });
+        });
     </script>
 </body>
 </html>
