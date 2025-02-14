@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Epic AI Planetary Alert System</title>
   <style>
-    /* Your Epic Styles */
+    /* Epic Styles */
     body {
       background-color: #000;
       color: #fff;
@@ -62,7 +62,7 @@
     href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap"
     rel="stylesheet"
   />
-  <!-- Chart.js and (optionally) the Streaming Plugin -->
+  <!-- Chart.js and Streaming Plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-streaming@2.0.0"></script>
   <!-- Leaflet for maps -->
@@ -71,6 +71,12 @@
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/leaflet@1.7.1/dist/leaflet.css"
   />
+  <script>
+    // Ensure the Chart.js streaming plugin is registered.
+    if (typeof ChartStreaming !== "undefined") {
+      Chart.register(ChartStreaming);
+    }
+  </script>
 </head>
 <body>
   <div class="container">
@@ -174,7 +180,7 @@
   </div>
 
   <script>
-    // Generic fetch function with optional fallback support
+    // Generic fetch function with optional fallback
     function fetchData(url, elementId, callback, fallbackUrl) {
       fetch(url)
         .then((response) => {
@@ -265,19 +271,21 @@
       );
     }
 
-    // Fetch Solar Activity Data (NASA CME data)
+    // Fetch Solar Activity Data (NASA CME)
     fetchData(
       "https://api.nasa.gov/DONKI/CME?startDate=2024-02-06&endDate=2024-02-13&api_key=YOUR_API_KEY",
       "solar-activity",
       function (data) {
         let solarActivityText = "Recent Coronal Mass Ejections:\n";
         data.forEach((cme) => {
-          solarActivityText += `- ${cme.startTime}: ${cme.note || "No details"}\n`;
+          solarActivityText += `- ${cme.startTime}: ${
+            cme.note || "No details"
+          }\n`;
         });
         document.getElementById("solar-activity").textContent =
           solarActivityText;
       },
-      // Example fallback via AllOrigins (if CORS becomes an issue)
+      // Example fallback via AllOrigins (if needed)
       "https://api.allorigins.hexocode.repl.co/get?disableCache=true&url=" +
         encodeURIComponent(
           "https://api.nasa.gov/DONKI/CME?startDate=2024-02-06&endDate=2024-02-13&api_key=YOUR_API_KEY"
@@ -435,6 +443,7 @@
       "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=MLLW&units=english&time_zone=gmt&format=json",
       "moon-tides",
       function (data) {
+        // Hide the loading message and populate the table
         document.getElementById("moon-tides").style.display = "none";
         const table = document.getElementById("tidal-cycle");
         data.predictions.forEach((pred) => {
@@ -447,7 +456,7 @@
 
     // Simple placeholder for Moon Phase calculation
     function getMoonPhase() {
-      return "New Moon"; // Replace with an actual calculation or API call as needed
+      return "New Moon"; // Replace with an actual calculation or API call if needed
     }
 
     // Fetch NASA Near-Earth Objects Data
@@ -476,8 +485,8 @@
               ).toFixed(2)}</td>
               <td>${parseFloat(
                 (obj.estimated_diameter.meters.estimated_diameter_min +
-                  obj.estimated_diameter.meters.estimated_diameter_max) /
-                  2
+                 obj.estimated_diameter.meters.estimated_diameter_max) /
+                 2
               ).toFixed(2)}</td>
             `;
             neoTable.appendChild(row);
@@ -577,12 +586,8 @@
 
     // Initialize Live Schumann Resonance Graph
     function initializeSchumannGraph() {
-      const ctx = document
-        .getElementById("schumann-graph")
-        .getContext("2d");
-
-      // Using Chart.js streaming plugin if available:
-      const schumannChart = new Chart(ctx, {
+      const ctx = document.getElementById("schumann-graph").getContext("2d");
+      new Chart(ctx, {
         type: "line",
         data: {
           datasets: [
@@ -591,9 +596,9 @@
               borderColor: "rgba(0, 255, 255, 1)",
               backgroundColor: "rgba(0, 255, 255, 0.2)",
               fill: true,
-              data: [],
-            },
-          ],
+              data: []
+            }
+          ]
         },
         options: {
           scales: {
@@ -605,38 +610,38 @@
                 onRefresh: function (chart) {
                   chart.data.datasets[0].data.push({
                     x: Date.now(),
-                    y: 7.83 + (Math.random() - 0.5) * 0.2,
+                    y: 7.83 + (Math.random() - 0.5) * 0.2
                   });
-                },
+                }
               },
               title: {
                 display: true,
                 text: "Time",
-                color: "white",
-              },
+                color: "white"
+              }
             },
             y: {
               title: {
                 display: true,
                 text: "Frequency (Hz)",
-                color: "white",
+                color: "white"
               },
               suggestedMin: 7.7,
-              suggestedMax: 7.95,
-            },
+              suggestedMax: 7.95
+            }
           },
           plugins: {
             legend: {
               labels: {
-                color: "white",
-              },
-            },
-          },
-        },
+                color: "white"
+              }
+            }
+          }
+        }
       });
     }
 
-    // Initialize maps and graphs once the page loads
+    // Initialize maps and graphs when the page loads
     window.onload = function () {
       initializeTsunamiBuoyMap();
       initializeAuroraMap();
@@ -645,5 +650,6 @@
   </script>
 </body>
 </html>
+
 
 
