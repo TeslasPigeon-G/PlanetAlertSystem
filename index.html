@@ -15,58 +15,58 @@
             overflow-x: hidden;
             animation: darkSpace 20s infinite alternate;
         }
-
+        
         @keyframes darkSpace {
             0% { background-position: 0% 20%; }
             50% { background-position: 100% 80%; }
             100% { background-position: 0% 20%; }
         }
-
+        
         .container {
             max-width: 1400px;
             margin: auto;
             padding: 40px;
             padding-top: 80px;
         }
-
+        
         h1 {
             font-size: 4.5em;
             margin-bottom: 30px;
             color: #fff;
-            text-shadow: 0 0 15px #fff, 0 0 30px #fff, 0 0 45px #e60073, 0 0 60px #e60073, 0 0 75px #e60073, 0 0 90px #e60073;
+            text-shadow: 0 0 15px #fff, 0 0 30px #fff, 0 0 45px #e60073;
             letter-spacing: 3px;
             display: inline-block;
             animation: titlePulse 3s ease-in-out infinite alternate;
         }
-
+        
         @keyframes titlePulse {
             from { text-shadow: 0 0 15px #fff, 0 0 30px #fff, 0 0 45px #e60073; }
             to { text-shadow: 0 0 30px #fff, 0 0 60px #fff, 0 0 90px #e60073; }
         }
-
+        
         p {
             font-size: 1.5em;
             color: #d0d0d0;
             margin-bottom: 40px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
         }
-
+        
         .section {
             margin-bottom: 60px;
             padding: 50px;
             background: rgba(17, 25, 40, 0.8);
             border-radius: 30px;
-            box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 123, 255, 0.2);
+            box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.8);
             border: 3px solid rgba(255, 255, 255, 0.1);
             transition: all 0.5s ease-in-out;
         }
-
+        
         .section:hover {
             transform: translateY(-15px);
-            box-shadow: 0px 30px 60px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(0, 123, 255, 0.3);
+            box-shadow: 0px 30px 60px rgba(0, 0, 0, 0.9);
             background: rgba(30, 42, 60, 0.9);
         }
-
+        
         h2 {
             color: #4FC3F7;
             font-size: 3em;
@@ -76,125 +76,10 @@
             letter-spacing: 2px;
             animation: epicPulse 4s infinite alternate;
         }
-
+        
         @keyframes epicPulse {
             0% { transform: scale(1); }
             100% { transform: scale(1.07); }
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(30, 42, 60, 0.8);
-            color: #fff;
-            margin-top: 30px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.6);
-        }
-
-        th, td {
-            padding: 20px;
-            border: 3px solid #293D5B;
-            text-align: left;
-        }
-
-        th {
-            background: rgba(60, 75, 100, 0.5);
-            color: #80deea;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 700;
-        }
-
-        tr:nth-child(even) {
-            background: rgba(40, 55, 80, 0.5);
-        }
-
-        .error {
-            color: #FF4081;
-            font-weight: bold;
-            font-size: 1.2em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .soho-images, .aurora-globe, .solar-flares-chart {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .soho-images img, .aurora-globe img {
-            max-width: 350px;
-            margin: 30px;
-            border: 4px solid #777;
-            border-radius: 20px;
-            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.8);
-            transition: all 0.3s ease-in-out;
-        }
-
-        .soho-images img:hover, .aurora-globe img:hover {
-            transform: scale(1.15);
-            box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.9);
-        }
-
-        .solar-flares-chart canvas {
-            width: 100%;
-            max-width: 1200px;
-            border-radius: 20px;
-            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.8);
-        }
-
-        #sun-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 30px;
-            box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.8);
-            transition: all 0.3s ease-in-out;
-        }
-
-        #sun-image:hover {
-            transform: scale(1.1);
-            box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.9);
-        }
-
-        @keyframes loading {
-            0% { opacity: 0.4; }
-            50% { opacity: 1; }
-            100% { opacity: 0.4; }
-        }
-
-        .loading {
-            font-family: monospace;
-            font-size: 1.2em;
-            color: #eee;
-            text-align: left;
-            padding: 30px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 20px;
-            white-space: pre-wrap;
-            overflow-x: auto;
-            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.5);
-            animation: loading 2s linear infinite;
-        }
-
-        #earthquake-map, #tsunami-buoy-map, #aurora-map {
-            width: 100%;
-            height: 500px;
-            margin-top: 30px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.8);
-        }
-
-        .info.legend {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 16px;
-            color: white;
-            text-align: left;
-            box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.5);
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
@@ -205,10 +90,13 @@
 
 <body>
     <div class="container">
-        <h1 data-text="🌍 Epic AI Planetary Alert System 🚀">🌍 Epic AI Planetary Alert System 🚀</h1>
+        <h1>🌍 Epic AI Planetary Alert System 🚀</h1>
         <p>Real-time monitoring of Earth, solar activity, asteroids, and space weather.</p>
 
-        <!-- ... (All sections remain as before but with enhanced styling) ... -->
+        <div class="section">
+            <h2>🌞 Solar Activity</h2>
+            <pre id="solar-activity" class="loading">Loading...</pre>
+        </div>
     </div>
 
     <script>
@@ -233,168 +121,12 @@
                 });
         }
 
-        // Animate title
-        document.addEventListener("DOMContentLoaded", function() {
-            const title = document.querySelector("h1");
-            const text = title.getAttribute('data-text');
-            let index = 0;
-
-            function type() {
-                if (index < text.length) {
-                    title.textContent = text.slice(0, index + 1);
-                    index++;
-                    setTimeout(type, 100); // Speed of typing
-                }
-            }
-
-            type();
-        });
-
-        // Update Aurora Prediction Map
-        function updateAuroraGlobe() {
-            document.getElementById('aurora-globe').src = "https://services.swpc.noaa.gov/images/ovation-north-latest.jpg?" + new Date().getTime();
+        function updateTimeAndDate() {
+            let now = new Date();
+            document.getElementById("current-time").textContent = now.toLocaleTimeString();
+            document.getElementById("current-date").textContent = now.toLocaleDateString();
         }
-        setInterval(updateAuroraGlobe, 600000);
-        updateAuroraGlobe();
-
-        // New function for interactive Aurora Map
-        function initializeAuroraMap() {
-            // ... (Aurora map code remains unchanged)
-        }
-
-        // Fetch Solar Activity Data - Note: This API is not using your key, as it's for a different NASA service
-        fetchData("https://api.nasa.gov/DONKI/CME?startDate=2024-02-06&endDate=2024-02-13&api_key=DEMO_KEY", "solar-activity", function (data) {
-            let solarActivityText = "Recent Coronal Mass Ejections:\n";
-            data.forEach(cme => {
-                solarActivityText += `- ${cme.startTime}: ${cme.note}\n`;
-            });
-            document.getElementById("solar-activity").textContent = solarActivityText;
-        });
-
-        // Update SOHO Images
-        function updateSOHOImages() {
-            const timestamp = new Date().getTime();
-            document.getElementById('eit-171').src = `https://soho.nascom.nasa.gov/data/LATEST/current_eit_171.gif?${timestamp}`;
-            document.getElementById('lasco-c2').src = `https://soho.nascom.nasa.gov/data/LATEST/current_c2.gif?${timestamp}`;
-            document.getElementById('lasco-c3').src = `https://soho.nascom.nasa.gov/data/LATEST/current_c3.gif?${timestamp}`;
-        }
-        setInterval(updateSOHOImages, 900000);
-        updateSOHOImages();
-
-        // Fetch Sun Spot Numbers
-        fetchData("https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json", "sun-spot-numbers", function (data) {
-            const latest = data[data.length - 1];
-            if (latest && latest.sunspot_number !== undefined) {
-                document.getElementById('sun-spot-numbers').textContent = `Current Sunspot Number: ${latest.sunspot_number} | Last Updated: ${latest.time_tag}`;
-            }
-        });
-
-        // Fetch Volcanic Activity 
-        fetchData("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2024-02-06&endtime=2024-02-13&eventtype=volcanic_eruption", "volcano-data", function (data) {
-            let volcanoText = "Recent Volcanic Activity:\n";
-            data.features.forEach(feature => {
-                volcanoText += `- ${feature.properties.place}: Magnitude ${feature.properties.mag}\n`;
-            });
-            document.getElementById("volcano-data").textContent = volcanoText;
-        });
-
-        // Fetch Tsunami Alerts
-        fetchData("https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2024-02-06&endtime=2024-02-13&eventtype=tsunami", "tsunami-alerts", function (data) {
-            let tsunamiText = "Recent Tsunami Events:\n";
-            data.features.forEach(feature => {
-                tsunamiText += `- ${feature.properties.place}: Magnitude ${feature.properties.mag}\n`;
-            });
-            document.getElementById("tsunami-alerts").textContent = tsunamiText;
-        });
-
-        // New function for Tsunami Buoys Map
-        function initializeTsunamiBuoyMap() {
-            // ... (Tsunami Buoy Map code remains unchanged)
-        }
-
-        // Fetch Severe Weather Alerts for Maryland
-        fetchData("https://api.weather.gov/alerts/active?area=MD", "weather-alerts", function (data) {
-            let weatherText = "Current Weather Alerts in Maryland:\n";
-            data.features.forEach(feature => {
-                weatherText += `- ${feature.properties.event}: ${feature.properties.headline}\n`;
-            });
-            document.getElementById("weather-alerts").textContent = weatherText;
-        });
-
-        // Fetch Earthquake Alerts and Map
-        fetchData("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.geojson", "earthquake-alerts", function (data) {
-            let earthquakeText = "Significant Earthquakes This Week:\n";
-            data.features.forEach(feature => {
-                earthquakeText += `- ${feature.properties.place}: Magnitude ${feature.properties.mag}\n`;
-            });
-            document.getElementById("earthquake-alerts").textContent = earthquakeText;
-
-            // ... (Earthquake Map code remains unchanged)
-        });
-
-        // Moon & Tidal Cycle
-        fetchData("https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=9414290&product=predictions&datum=MLLW&units=english&time_zone=gmt&format=json", "moon-tides", function(data) {
-            document.getElementById("moon-tides").style.display = "none";
-            const table = document.getElementById("tidal-cycle");
-            data.predictions.forEach(pred => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${pred.t}</td>
-                    <td>${pred.v}</td>
-                    <td>${getMoonPhase()}</td>
-                `;
-                table.appendChild(row);
-            });
-        });
-
-        // Function to get Moon Phase - Note: This is a placeholder. For accurate moon phase, you'd need additional API or calculation.
-        function getMoonPhase() {
-            return "New Moon"; // Simplified, you'd need to calculate or fetch actual phase
-        }
-
-        // NASA NEO API - Using your API key
-        const today = new Date().toISOString().split("T")[0];
-        const endDate = new Date();
-        endDate.setDate(endDate.getDate() + 7);
-        const formattedEndDate = endDate.toISOString().split("T")[0];
-        
-        fetchData(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${today}&end_date=${formattedEndDate}&api_key=1daN1duaWTVxHZal50lyPq6iWEf5uetZWKsMh5O7`, "near-earth-objects", function(data) {
-            const neoTable = document.getElementById("neo-table");
-            document.getElementById("near-earth-objects").style.display = "none";
-            
-            const neoData = data.near_earth_objects;
-            Object.keys(neoData).forEach(date => {
-                neoData[date].forEach(obj => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${obj.name}</td>
-                        <td>${obj.close_approach_data[0].close_approach_date}</td>
-                        <td>${parseFloat(obj.close_approach_data[0].miss_distance.kilometers).toFixed(2)}</td>
-                        <td>${parseFloat(obj.close_approach_data[0].relative_velocity.kilometers_per_second).toFixed(2)}</td>
-                        <td>${parseFloat((obj.estimated_diameter.meters.estimated_diameter_min + obj.estimated_diameter.meters.estimated_diameter_max) / 2).toFixed(2)}</td>
-                    `;
-                    neoTable.appendChild(row);
-                });
-            });
-        });
-
-        // Solar Flares Chart
-        fetchData("https://api.nasa.gov/DONKI/FLR?startDate=2024-02-06&endDate=2024-02-13&api_key=1daN1duaWTVxHZal50lyPq6iWEf5uetZWKsMh5O7", null, function (data) {
-            // ... (Solar Flares Chart code remains unchanged)
-        });
-
-        // Update Sun Image
-        function updateSunImage() {
-            document.getElementById('sun-image').src = `https://soho.nascom.nasa.gov/data/LATEST/current_eit_304.gif?${new Date().getTime()}`;
-        }
-        setInterval(updateSunImage, 3600000);
-        updateSunImage();
-
-        // Initialize both maps when the page loads
-        window.onload = function() {
-            initializeTsunamiBuoyMap();
-            initializeAuroraMap();
-        };
+        setInterval(updateTimeAndDate, 1000);
     </script>
 </body>
 </html>
