@@ -35,7 +35,7 @@
                 <img id="lasco-c3" src="loading.gif" alt="SOHO LASCO C3 Image">
             </div>
             <div class="aurora-globe">
-                <img id="aurora-globe" src="loading.gif" alt="Aurora Globe">
+                <img id="aurora-globe" src="loading.gif" alt="Aurora Prediction Map">
             </div>
             <div class="solar-flares-chart">
                 <canvas id="solar-flares"></canvas>
@@ -44,8 +44,16 @@
             <p id="sun-spot-numbers">Loading Sun Spot Numbers...</p>
         </div>
         
-        <!-- Other sections like before -->
-
+        <div class="section">
+            <h2>🌋 Volcanic Activity & Tsunamis</h2>
+            <pre id="volcano-data">Loading...</pre>
+            <pre id="tsunami-alerts">Loading...</pre>
+        </div>
+        
+        <div class="section">
+            <h2>⛈️ Severe Weather Alerts (Maryland)</h2>
+            <pre id="weather-alerts">Loading...</pre>
+        </div>
     </div>
 
     <script>
@@ -70,86 +78,20 @@
             });
         }
 
-        // Function to update SOHO images
-        function updateSOHOImages() {
-            const eit171 = document.getElementById('eit-171');
-            const lascoC2 = document.getElementById('lasco-c2');
-            const lascoC3 = document.getElementById('lasco-c3');
-            
-            eit171.src = "https://soho.nascom.nasa.gov/data/realtime/eit_171/512/latest.jpg";
-            lascoC2.src = "https://soho.nascom.nasa.gov/data/realtime/c2/512/latest.jpg";
-            lascoC3.src = "https://soho.nascom.nasa.gov/data/realtime/c3/512/latest.jpg";
-        }
-
-        // Update SOHO images every 10 minutes
-        updateSOHOImages();
-        setInterval(updateSOHOImages, 600000);
-
-        // Aurora Globe Image
+        // Update Aurora Prediction Map
         function updateAuroraGlobe() {
-            document.getElementById('aurora-globe').src = "https://services.swpc.noaa.gov/images/ovation-north-latest.jpg";
+            document.getElementById('aurora-globe').src = "https://services.swpc.noaa.gov/images/ovation-north-latest.jpg?" + new Date().getTime();
         }
+        setInterval(updateAuroraGlobe, 600000);
         updateAuroraGlobe();
-        setInterval(updateAuroraGlobe, 600000); // Update every 10 minutes
 
-        // Solar Flares Chart
-        fetchData("https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json", "solar-activity", function(data) {
-            const ctx = document.getElementById('solar-flares').getContext('2d');
-            const labels = data.map(item => item.time_tag);
-            const sunspotNumbers = data.map(item => item.sunspot_number);
-            const flareClasses = data.map(item => item.flare_class); // Assuming flare class is available
+        // Fetch Volcanic Activity & Tsunamis Data
+        fetchData("https://volcano.si.edu/news/WeeklyVolcanoRSS.xml", "volcano-data");
+        fetchData("https://www.tsunami.gov/events/xml/PAAQ.atom", "tsunami-alerts");
 
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Sunspot Number',
-                            data: sunspotNumbers,
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Flare Class',
-                            data: flareClasses.map(f => f ? ['C', 'M', 'X'].indexOf(f[0]) + 1 : 0), // Convert to numeric scale
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            title: { display: true, text: 'Sunspot Number' }
-                        },
-                        y1: {
-                            type: 'linear',
-                            position: 'right',
-                            title: { display: true, text: 'Flare Class (C,M,X)' }
-                        }
-                    }
-                }
-            });
-        });
-
-        // Current Sun Image with Sunspot Numbers
-        function updateSunImage() {
-            fetchData("https://services.swpc.noaa.gov/json/solar-cycle/observed-solar-cycle-indices.json", null, function(data) {
-                const latest = data[data.length - 1];
-                if (latest && latest.sunspot_number !== undefined) {
-                    document.getElementById('sun-image').src = "https://services.swpc.noaa.gov/images/synoptic-map.jpg";
-                    document.getElementById('sun-spot-numbers').textContent = `Current Sunspot Number: ${latest.sunspot_number} | Last Updated: ${latest.time_tag}`;
-                }
-            });
-        }
-        updateSunImage();
-        setInterval(updateSunImage, 3600000); // Update every hour
-
-        // ... Rest of your code for NEO, Earthquakes, Moon & Tides ...
+        // Fetch Severe Weather Alerts for Maryland
+        fetchData("https://api.weather.gov/alerts/active?area=MD", "weather-alerts");
     </script>
 </body>
 </html>
+
